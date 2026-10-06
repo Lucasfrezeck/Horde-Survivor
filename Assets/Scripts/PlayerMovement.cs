@@ -18,10 +18,10 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         //Variavel que armazena o valor lido do movimento do eixo horizontal
-        float horizontal = Input.GetAxis("Horizontal");
+        float horizontal = Input.GetAxisRaw("Horizontal");
         
         //Variavel que armazena o valor lido do movimento do eixo vertical
-        float vertical = Input.GetAxis("Vertical");
+        float vertical = Input.GetAxisRaw("Vertical");
 
         // (Vector3 é um tipo de dado (x,y,z)). Variavel que armazena o calculo da direção do movimento do jogador e (.normalized) mantem a diagonal na mesma velocidade
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
