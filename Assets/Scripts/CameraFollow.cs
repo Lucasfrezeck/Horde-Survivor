@@ -13,7 +13,7 @@ public class CameraFollow : MonoBehaviour
     public float minFov = 25f;
     
     //sensibilidade do zoom
-    public float zoomSpeed = 10f;
+    public float zoomSpeed = 20f;
 
     //cria a variavel Vector3 do offset da camera
     public Vector3 offset = new Vector3(0f, 9f, -6f);
