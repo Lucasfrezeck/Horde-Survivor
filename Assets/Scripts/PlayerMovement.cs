@@ -2,16 +2,18 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    //base speed var
-    public float speed = 5.0f;
+  
+ 
     
     // referencia componente CharacterController
     private CharacterController controller;
+    private PlayerStats playerStats;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        playerStats = GetComponent<PlayerStats>();
     }
 
     // Update is called once per frame
@@ -27,6 +29,6 @@ public class PlayerMovement : MonoBehaviour
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
         // Cálculo de movimento
-        controller.Move(direction * Time.deltaTime * speed);
+        controller.Move(direction * Time.deltaTime * playerStats.moveSpeed);
     }
 }
