@@ -9,11 +9,15 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private PlayerStats playerStats;
 
+    //referencia componente animator
+    private Animator animator;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         controller = GetComponent<CharacterController>();
         playerStats = GetComponent<PlayerStats>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     // Update is called once per frame
@@ -27,6 +31,12 @@ public class PlayerMovement : MonoBehaviour
 
         // (Vector3 é um tipo de dado (x,y,z)). Variavel que armazena o calculo da direção do movimento do jogador e (.normalized) mantem a diagonal na mesma velocidade
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
+        
+        //defino que movementAmount = magnitude da variavel direction
+        float movementAmount = direction.magnitude;
+
+        //seto o float de animator"speed" com o valor de movementAmount
+        animator.SetFloat("Speed", movementAmount);
 
         // Cálculo de movimento
         controller.Move(direction * Time.deltaTime * playerStats.moveSpeed);
