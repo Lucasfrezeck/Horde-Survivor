@@ -9,7 +9,7 @@ public class CameraFollow : MonoBehaviour
     private Camera cameraComponent;
 
     //define os valores de Maior e menor angulo de visão
-    public float maxFov = 70f; 
+    public float maxFov = 90f; 
     public float minFov = 25f;
     
     //sensibilidade do zoom

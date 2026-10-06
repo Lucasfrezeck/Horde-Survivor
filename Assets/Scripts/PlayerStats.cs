@@ -4,7 +4,7 @@ public class PlayerStats : MonoBehaviour
 {
     //variavéis de estatisticas do Player
     public int maxHealth = 300;
-    public float moveSpeed = 5.0f;
+    public float moveSpeed = 10.0f;
     public int attackDmg = 17;
     public float attackSpeed = 1.0f;
     public float attackRange = 3.5f;
