@@ -12,6 +12,11 @@ public class PlayerMovement : MonoBehaviour
     //referencia componente animator
     private Animator animator;
 
+    // Velocidade angular da virada, em graus por segundo.
+    [SerializeField] private float turnSpeed = 540f;
+    [SerializeField] private float referenceMoveSpeed = 7.5f;
+    [SerializeField] private float runAnimationSpeed = 1.2f;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -29,16 +34,31 @@ public class PlayerMovement : MonoBehaviour
         //Variavel que armazena o valor lido do movimento do eixo vertical
         float vertical = Input.GetAxisRaw("Vertical");
 
-        // (Vector3 é um tipo de dado (x,y,z)). Variavel que armazena o calculo da direção do movimento do jogador e (.normalized) mantem a diagonal na mesma velocidade
+        // Vector3 indica a direÃ§Ã£o do movimento, e normalized mantÃ©m a mesma velocidade nas diagonais.
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
         
         //defino que movementAmount = magnitude da variavel direction
         float movementAmount = direction.magnitude;
 
         //seto o float de animator"speed" com o valor de movementAmount
-        animator.SetFloat("Speed", movementAmount);
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", movementAmount);
+            animator.speed = movementAmount > 0f
+                ? runAnimationSpeed * playerStats.moveSpeed / Mathf.Max(referenceMoveSpeed, 0.01f)
+                : 1f;
+        }
 
-        // Cálculo de movimento
+        if (movementAmount > 0f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation,
+                targetRotation,
+                turnSpeed * Time.deltaTime);
+        }
+
+        // CÃ¡lculo de movimento
         controller.Move(direction * Time.deltaTime * playerStats.moveSpeed);
     }
 }

@@ -43,7 +43,7 @@ public class PlayerHealthHUD : MonoBehaviour
         GUI.DrawTexture(new Rect(31f, 31f, 344f, 86f), Texture2D.whiteTexture);
 
         GUI.color = Color.white;
-        GUI.Label(new Rect(45f, 38f, 170f, 25f), "VITALIDADE", labelStyle);
+        GUI.Label(new Rect(45f, 38f, 170f, 25f), "Health", labelStyle);
         GUI.Label(new Rect(202f, 38f, 158f, 25f),
             playerHealth.CurrentHealth + " / " + playerHealth.MaxHealth, valueStyle);
 

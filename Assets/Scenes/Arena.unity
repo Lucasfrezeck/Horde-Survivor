@@ -482,7 +482,6 @@ GameObject:
   - component: {fileID: 683337235}
   - component: {fileID: 683337238}
   - component: {fileID: 683337239}
-  - component: {fileID: 683337240}
   - component: {fileID: 683337241}
   - component: {fileID: 683337242}
   - component: {fileID: 683337243}
@@ -601,18 +600,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85cc818549484ba44937ec62b7eb3d19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &683337240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 683337233}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f65fd2eb33082a44087db6a8fcd09d55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  turnSpeed: 540
+  referenceMoveSpeed: 7.5
+  runAnimationSpeed: 1.2
 --- !u!114 &683337241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -626,7 +616,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 300
-  moveSpeed: 5
+  moveSpeed: 7.5
   attackDmg: 17
   attackSpeed: 1
   attackRange: 3.5
@@ -960,7 +950,7 @@ Transform:
   m_GameObject: {fileID: 1218937872}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10, y: 0, z: -10}
+  m_LocalPosition: {x: -20, y: 0, z: -20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
