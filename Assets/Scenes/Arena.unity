@@ -876,7 +876,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3.5
   turnSpeed: 540
-  movementAnimatorController: {fileID: 9100000, guid: c28c9998e3e4ecd4a851ad96c1067ac4, type: 2}
+  movementAnimatorController: {fileID: 9100000, guid: 61a67eb5038f4f40849ccdf716a98a0c, type: 2}
   referenceMoveSpeed: 7.5
   runAnimationSpeed: 1.2
   attackRange: 1.5

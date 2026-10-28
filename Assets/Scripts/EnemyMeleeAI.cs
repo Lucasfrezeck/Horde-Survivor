@@ -4,6 +4,8 @@ using UnityEngine;
 public class EnemyMeleeAI : MonoBehaviour
 {
     private static readonly List<EnemyMeleeAI> ActiveEnemies = new List<EnemyMeleeAI>();
+    private static readonly int SpeedParameter = Animator.StringToHash("Speed");
+    private static readonly int AttackParameter = Animator.StringToHash("Attack");
 
     [Header("Target and movement")]
     [SerializeField] private float moveSpeed = 3.5f;
@@ -94,6 +96,11 @@ public class EnemyMeleeAI : MonoBehaviour
         if (Time.time >= nextAttackTime && CanAttack(distanceToPlayer, toPlayer))
         {
             SetMovingAnimation(false);
+            if (animator != null)
+            {
+                animator.SetTrigger(AttackParameter);
+            }
+
             isWindingUp = true;
             windupEndTime = Time.time + attackWindup;
             return;
@@ -107,7 +114,7 @@ public class EnemyMeleeAI : MonoBehaviour
     {
         if (animator != null)
         {
-            animator.SetFloat("Speed", isMoving ? 1f : 0f);
+            animator.SetFloat(SpeedParameter, isMoving ? 1f : 0f);
             animator.speed = isMoving
                 ? runAnimationSpeed * moveSpeed / Mathf.Max(referenceMoveSpeed, 0.01f)
                 : 1f;
