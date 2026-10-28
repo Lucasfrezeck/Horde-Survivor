@@ -429,7 +429,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 07f16099e1946914783ee5974a0867ef, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 07f16099e1946914783ee5974a0867ef, type: 3}
       propertyPath: m_LocalRotation.x
@@ -437,7 +437,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 07f16099e1946914783ee5974a0867ef, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 07f16099e1946914783ee5974a0867ef, type: 3}
       propertyPath: m_LocalRotation.z
@@ -449,7 +449,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 07f16099e1946914783ee5974a0867ef, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 07f16099e1946914783ee5974a0867ef, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -600,7 +600,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85cc818549484ba44937ec62b7eb3d19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turnSpeed: 540
   referenceMoveSpeed: 7.5
   runAnimationSpeed: 1.2
 --- !u!114 &683337241
@@ -750,6 +749,7 @@ GameObject:
   - component: {fileID: 1200770409}
   - component: {fileID: 1200770408}
   - component: {fileID: 1200770412}
+  - component: {fileID: 1200770413}
   m_Layer: 0
   m_Name: EnemyDummy
   m_TagString: Untagged
@@ -862,6 +862,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 30
+--- !u!114 &1200770413
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1200770407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c75e4a3206b4f958b4e50ae2860f893, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 3.5
+  turnSpeed: 540
+  attackRange: 1.5
+  attackConeAngle: 120
+  attackWindup: 0.15
+  attackDamage: 12
+  attackCooldown: 1
+  separationRadius: 1.25
+  separationStrength: 1
 --- !u!1 &1218937872
 GameObject:
   m_ObjectHideFlags: 0
