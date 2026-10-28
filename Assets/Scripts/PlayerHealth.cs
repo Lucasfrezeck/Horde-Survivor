@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -8,19 +9,42 @@ public class PlayerHealth : MonoBehaviour
     //crio uma variavel pra vida atual do player
     private int currentHealth;
 
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => playerStats != null ? Mathf.Max(0, playerStats.maxHealth) : 0;
+
+    public event Action<int, int> HealthChanged;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         playerStats = GetComponent<PlayerStats>();
-        currentHealth = playerStats.maxHealth;
+        if (playerStats == null)
+        {
+            Debug.LogError("PlayerHealth precisa de um componente PlayerStats no mesmo objeto.", this);
+            enabled = false;
+            return;
+        }
 
-        Debug.Log("Você tem " + currentHealth + " de vida.");
+        currentHealth = Mathf.Max(0, playerStats.maxHealth);
+        if (GetComponent<PlayerHealthHUD>() == null)
+        {
+            gameObject.AddComponent<PlayerHealthHUD>();
+        }
+
+        HealthChanged?.Invoke(currentHealth, MaxHealth);
+
+        Debug.Log("Vocï¿½ tem " + currentHealth + " de vida.");
         
     }
 
-    // função TakeDamage que recebe um inteiro damage
+    // funï¿½ï¿½o TakeDamage que recebe um inteiro damage
     public void TakeDamage(int damage)
     {
+        if (damage <= 0 || currentHealth <= 0)
+        {
+            return;
+        }
+
         currentHealth -= damage;
 
 
@@ -30,13 +54,15 @@ public class PlayerHealth : MonoBehaviour
             currentHealth = 0;
         }
 
-        Debug.Log("Você recebeu " + damage + " de dano. " + currentHealth + "pontos de vida restantes" );
+        HealthChanged?.Invoke(currentHealth, MaxHealth);
+
+        Debug.Log("Vocï¿½ recebeu " + damage + " de dano. " + currentHealth + "pontos de vida restantes" );
 
 
         //if pra printar que vc morreu
         if (currentHealth == 0)
         {
-            Debug.Log("Você está morto.");
+            Debug.Log("Vocï¿½ estï¿½ morto.");
         }
     }
 }
