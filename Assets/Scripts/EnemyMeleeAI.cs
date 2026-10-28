@@ -8,6 +8,9 @@ public class EnemyMeleeAI : MonoBehaviour
     [Header("Target and movement")]
     [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float turnSpeed = 540f;
+    [SerializeField] private RuntimeAnimatorController movementAnimatorController;
+    [SerializeField] private float referenceMoveSpeed = 7.5f;
+    [SerializeField] private float runAnimationSpeed = 1.2f;
 
     [Header("Melee attack")]
     [SerializeField] private float attackRange = 1.5f;
@@ -21,6 +24,7 @@ public class EnemyMeleeAI : MonoBehaviour
     [SerializeField] private float separationStrength = 1f;
 
     private PlayerHealth playerHealth;
+    private Animator animator;
     private float nextAttackTime;
     private float windupEndTime;
     private bool isWindingUp;
@@ -41,6 +45,13 @@ public class EnemyMeleeAI : MonoBehaviour
     private void Start()
     {
         playerHealth = FindFirstObjectByType<PlayerHealth>();
+        animator = GetComponentInChildren<Animator>();
+        if (animator != null && movementAnimatorController != null)
+        {
+            animator.runtimeAnimatorController = movementAnimatorController;
+            animator.applyRootMotion = false;
+        }
+
         if (playerHealth == null)
         {
             Debug.LogError("EnemyMeleeAI precisa encontrar um PlayerHealth na cena.", this);
@@ -53,6 +64,7 @@ public class EnemyMeleeAI : MonoBehaviour
         if (playerHealth == null || playerHealth.CurrentHealth <= 0)
         {
             isWindingUp = false;
+            SetMovingAnimation(false);
             return;
         }
 
@@ -62,6 +74,8 @@ public class EnemyMeleeAI : MonoBehaviour
 
         if (isWindingUp)
         {
+            SetMovingAnimation(false);
+
             // Cancel the prepared hit if the player escapes or gets behind the enemy.
             if (!CanAttack(distanceToPlayer, toPlayer))
             {
@@ -79,12 +93,25 @@ public class EnemyMeleeAI : MonoBehaviour
 
         if (Time.time >= nextAttackTime && CanAttack(distanceToPlayer, toPlayer))
         {
+            SetMovingAnimation(false);
             isWindingUp = true;
             windupEndTime = Time.time + attackWindup;
             return;
         }
 
+        SetMovingAnimation(distanceToPlayer > attackRange);
         MoveTowardPlayer(toPlayer, distanceToPlayer);
+    }
+
+    private void SetMovingAnimation(bool isMoving)
+    {
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", isMoving ? 1f : 0f);
+            animator.speed = isMoving
+                ? runAnimationSpeed * moveSpeed / Mathf.Max(referenceMoveSpeed, 0.01f)
+                : 1f;
+        }
     }
 
     private Vector3 GetFlatDirectionToPlayer()
