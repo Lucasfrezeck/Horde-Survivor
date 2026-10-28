@@ -30,6 +30,10 @@ public class PlayerHealth : MonoBehaviour
         {
             gameObject.AddComponent<PlayerHealthHUD>();
         }
+        if (GetComponent<GameTimerHUD>() == null)
+        {
+            gameObject.AddComponent<GameTimerHUD>();
+        }
 
         HealthChanged?.Invoke(currentHealth, MaxHealth);
 

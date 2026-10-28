@@ -35,29 +35,30 @@ public class PlayerHealthHUD : MonoBehaviour
         float scale = Mathf.Clamp(Screen.height / 1080f, 0.7f, 1.4f);
         GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one * scale);
 
-        Rect panelRect = new Rect(28f, 28f, 350f, 92f);
+        Rect panelRect = new Rect(0f, 0f, 350f, 92f);
         GUI.color = GoldColor;
         GUI.DrawTexture(panelRect, Texture2D.whiteTexture);
 
         GUI.color = PanelColor;
-        GUI.DrawTexture(new Rect(31f, 31f, 344f, 86f), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(panelRect.x + 3f, panelRect.y + 3f, 344f, 86f), Texture2D.whiteTexture);
 
         GUI.color = Color.white;
-        GUI.Label(new Rect(45f, 38f, 170f, 25f), "Health", labelStyle);
-        GUI.Label(new Rect(202f, 38f, 158f, 25f),
+        GUI.Label(new Rect(panelRect.x + 17f, panelRect.y + 10f, 170f, 25f), "Health", labelStyle);
+        GUI.Label(new Rect(panelRect.x + 174f, panelRect.y + 10f, 158f, 25f),
             playerHealth.CurrentHealth + " / " + playerHealth.MaxHealth, valueStyle);
 
-        Rect barFrame = new Rect(42f, 77f, 322f, 28f);
+        Rect barFrame = new Rect(panelRect.x + 14f, panelRect.y + 49f, 322f, 28f);
         GUI.color = GoldColor;
         GUI.DrawTexture(barFrame, Texture2D.whiteTexture);
         GUI.color = new Color(0.06f, 0.05f, 0.05f, 1f);
-        GUI.DrawTexture(new Rect(44f, 79f, 318f, 24f), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(barFrame.x + 2f, barFrame.y + 2f, 318f, 24f), Texture2D.whiteTexture);
 
         float healthRatio = playerHealth.MaxHealth > 0
             ? Mathf.Clamp01((float)playerHealth.CurrentHealth / playerHealth.MaxHealth)
             : 0f;
         GUI.color = healthRatio <= 0.25f ? LowHealthColor : HealthColor;
-        GUI.DrawTexture(new Rect(44f, 79f, 318f * healthRatio, 24f), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(barFrame.x + 2f, barFrame.y + 2f, 318f * healthRatio, 24f),
+            Texture2D.whiteTexture);
 
         GUI.color = previousColor;
         GUI.matrix = previousMatrix;

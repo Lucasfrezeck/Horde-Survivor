@@ -6,11 +6,14 @@ public class EnemyMeleeAI : MonoBehaviour
     private static readonly List<EnemyMeleeAI> ActiveEnemies = new List<EnemyMeleeAI>();
     private static readonly int SpeedParameter = Animator.StringToHash("Speed");
     private static readonly int AttackParameter = Animator.StringToHash("Attack");
+    private static readonly int AttackState = Animator.StringToHash("Base Layer.Armature|Sword_Attack");
+    private static readonly int IdleState = Animator.StringToHash("Base Layer.Armature|Idle_Loop");
+    private static readonly int JogState = Animator.StringToHash("Base Layer.Armature|Jog_Fwd_Loop");
 
     [Header("Target and movement")]
     [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float turnSpeed = 540f;
-    [SerializeField] private RuntimeAnimatorController movementAnimatorController;
+    [SerializeField] private RuntimeAnimatorController enemyAnimatorController;
     [SerializeField] private float referenceMoveSpeed = 7.5f;
     [SerializeField] private float runAnimationSpeed = 1.2f;
 
@@ -18,6 +21,7 @@ public class EnemyMeleeAI : MonoBehaviour
     [SerializeField] private float attackRange = 1.5f;
     [SerializeField, Range(0f, 180f)] private float attackConeAngle = 120f;
     [SerializeField] private float attackWindup = 0.15f;
+    [SerializeField, Range(0.05f, 0.9f)] private float attackImpactNormalizedTime = 0.35f;
     [SerializeField] private int attackDamage = 12;
     [SerializeField] private float attackCooldown = 1f;
 
@@ -28,8 +32,11 @@ public class EnemyMeleeAI : MonoBehaviour
     private PlayerHealth playerHealth;
     private Animator animator;
     private float nextAttackTime;
+    private float attackStartedTime;
     private float windupEndTime;
     private bool isWindingUp;
+    private bool attackHitApplied;
+    private bool attackAnimationStarted;
 
     private void OnEnable()
     {
@@ -48,9 +55,9 @@ public class EnemyMeleeAI : MonoBehaviour
     {
         playerHealth = FindFirstObjectByType<PlayerHealth>();
         animator = GetComponentInChildren<Animator>();
-        if (animator != null && movementAnimatorController != null)
+        if (animator != null && enemyAnimatorController != null)
         {
-            animator.runtimeAnimatorController = movementAnimatorController;
+            animator.runtimeAnimatorController = enemyAnimatorController;
             animator.applyRootMotion = false;
         }
 
@@ -79,15 +86,50 @@ public class EnemyMeleeAI : MonoBehaviour
             SetMovingAnimation(false);
 
             // Cancel the prepared hit if the player escapes or gets behind the enemy.
-            if (!CanAttack(distanceToPlayer, toPlayer))
+            if (!attackHitApplied && !CanAttack(distanceToPlayer, toPlayer))
+            {
+                isWindingUp = false;
+                if (animator != null)
+                {
+                    animator.ResetTrigger(AttackParameter);
+                    animator.CrossFade(
+                        distanceToPlayer > attackRange ? JogState : IdleState,
+                        0.08f);
+                }
+            }
+            else if (TryGetAttackAnimationProgress(out float attackProgress))
+            {
+                attackAnimationStarted = true;
+
+                if (!attackHitApplied
+                    && Time.time >= windupEndTime
+                    && attackProgress >= attackImpactNormalizedTime)
+                {
+                    playerHealth.TakeDamage(attackDamage);
+                    nextAttackTime = Time.time + attackCooldown;
+                    attackHitApplied = true;
+                }
+
+                if (attackHitApplied && attackProgress >= 0.95f)
+                {
+                    isWindingUp = false;
+                }
+            }
+            else if (attackAnimationStarted)
             {
                 isWindingUp = false;
             }
-            else if (Time.time >= windupEndTime)
+            else if (animator == null
+                || animator.runtimeAnimatorController == null
+                || Time.time >= attackStartedTime + 0.5f)
             {
-                playerHealth.TakeDamage(attackDamage);
-                nextAttackTime = Time.time + attackCooldown;
-                isWindingUp = false;
+                if (Time.time >= windupEndTime)
+                {
+                    playerHealth.TakeDamage(attackDamage);
+                    nextAttackTime = Time.time + attackCooldown;
+                    attackHitApplied = true;
+                    isWindingUp = false;
+                }
             }
 
             return;
@@ -102,6 +144,9 @@ public class EnemyMeleeAI : MonoBehaviour
             }
 
             isWindingUp = true;
+            attackHitApplied = false;
+            attackAnimationStarted = false;
+            attackStartedTime = Time.time;
             windupEndTime = Time.time + attackWindup;
             return;
         }
@@ -119,6 +164,34 @@ public class EnemyMeleeAI : MonoBehaviour
                 ? runAnimationSpeed * moveSpeed / Mathf.Max(referenceMoveSpeed, 0.01f)
                 : 1f;
         }
+    }
+
+    private bool TryGetAttackAnimationProgress(out float normalizedTime)
+    {
+        normalizedTime = 0f;
+        if (animator == null)
+        {
+            return false;
+        }
+
+        AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(0);
+        if (currentState.fullPathHash == AttackState)
+        {
+            normalizedTime = currentState.normalizedTime;
+            return true;
+        }
+
+        if (animator.IsInTransition(0))
+        {
+            AnimatorStateInfo nextState = animator.GetNextAnimatorStateInfo(0);
+            if (nextState.fullPathHash == AttackState)
+            {
+                normalizedTime = nextState.normalizedTime;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Vector3 GetFlatDirectionToPlayer()
