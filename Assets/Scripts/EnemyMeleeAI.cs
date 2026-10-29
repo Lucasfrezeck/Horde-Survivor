@@ -31,6 +31,7 @@ public class EnemyMeleeAI : MonoBehaviour
 
     private PlayerHealth playerHealth;
     private Animator animator;
+    private CharacterController characterController;
     private float nextAttackTime;
     private float attackStartedTime;
     private float windupEndTime;
@@ -55,6 +56,7 @@ public class EnemyMeleeAI : MonoBehaviour
     {
         playerHealth = FindFirstObjectByType<PlayerHealth>();
         animator = GetComponentInChildren<Animator>();
+        characterController = GetComponent<CharacterController>();
         if (animator != null && enemyAnimatorController != null)
         {
             animator.runtimeAnimatorController = enemyAnimatorController;
@@ -242,7 +244,15 @@ public class EnemyMeleeAI : MonoBehaviour
 
         Vector3 separation = GetSeparationDirection();
         Vector3 movementDirection = (directionToPlayer + separation * separationStrength).normalized;
-        transform.position += movementDirection * moveSpeed * Time.deltaTime;
+        Vector3 movement = movementDirection * moveSpeed * Time.deltaTime;
+        if (characterController != null)
+        {
+            characterController.Move(movement);
+        }
+        else
+        {
+            transform.position += movement;
+        }
     }
 
     private Vector3 GetSeparationDirection()
