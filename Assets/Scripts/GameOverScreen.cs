@@ -132,17 +132,34 @@ public class GameOverScreen : MonoBehaviour
         button.colors = colors;
         button.onClick.AddListener(Restart);
         Label("RESTART", buttonFace, Vector2.zero, new Vector2(260f, 56f), 28, Gold);
+        RectTransform menuFrame = CreateRect("Main Menu", canvasObject.transform,
+            new Vector2(0f, -335f), new Vector2(290f, 66f));
+        menuFrame.gameObject.AddComponent<Image>().color = Gold;
+        RectTransform menuFace = CreateRect("Button", menuFrame, Vector2.zero, Vector2.zero);
+        Stretch(menuFace, 2f);
+        Image menuImage = menuFace.gameObject.AddComponent<Image>();
+        menuImage.color = face.color;
+        Button menuButton = menuFace.gameObject.AddComponent<Button>();
+        menuButton.targetGraphic = menuImage;
+        menuButton.colors = colors;
+        menuButton.onClick.AddListener(() => LoadScene("MainMenu"));
+        Label("MAIN MENU", menuFace, Vector2.zero, new Vector2(260f, 56f), 28, Gold);
         EventSystem.current.SetSelectedGameObject(buttonFace.gameObject);
     }
 
     private void Restart()
+    {
+        LoadScene("Arena");
+    }
+
+    private void LoadScene(string sceneName)
     {
         if (restarting) return;
         restarting = true;
         StopAllCoroutines();
         Time.timeScale = 1f;
         paused = false;
-        SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadSceneAsync(sceneName);
     }
 
     private Texture2D CreateVignette()
