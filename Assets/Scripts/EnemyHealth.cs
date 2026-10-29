@@ -10,6 +10,7 @@ public class EnemyHealth : MonoBehaviour
     public int CurrentHealth => currentHealth;
     public int MaxHealth => Mathf.Max(0, maxHealth);
     public event Action<int, int> HealthChanged;
+    public static event Action EnemyKilled;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -41,6 +42,7 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHealth == 0)
         {
+            EnemyKilled?.Invoke();
             Destroy(gameObject);
 
         }

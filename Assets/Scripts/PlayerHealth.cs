@@ -47,6 +47,10 @@ public class PlayerHealth : MonoBehaviour
         {
             gameObject.AddComponent<GameTimerHUD>();
         }
+        if (GetComponent<KillCounterHUD>() == null)
+        {
+            gameObject.AddComponent<KillCounterHUD>();
+        }
 
         HealthChanged?.Invoke(currentHealth, MaxHealth);
         Debug.Log("Você tem " + currentHealth + " de vida.");

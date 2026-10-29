@@ -10,6 +10,7 @@ public class PlayerHealthHUD : MonoBehaviour
     private PlayerHealth playerHealth;
     private GUIStyle labelStyle;
     private GUIStyle valueStyle;
+    private Texture2D heartTexture;
 
     private void Awake()
     {
@@ -18,7 +19,35 @@ public class PlayerHealthHUD : MonoBehaviour
         {
             Debug.LogError("PlayerHealthHUD precisa de um componente PlayerHealth no mesmo objeto.", this);
             enabled = false;
+            return;
         }
+
+        heartTexture = PixelHudIconFactory.Create(
+            new[]
+            {
+                "....DDDD..DDDD....",
+                "...DRRRDDDRRRD...",
+                "..DRHRRRRRRHRRD..",
+                ".DRRRRRRRRRRRRD.",
+                "DRRRRRRRRRRRRRRD",
+                "DRRRRRRRRRRRRRRD",
+                ".DRRRRRRRRRRRRD.",
+                "..DRRRRRRRRRRD..",
+                "...DRRRRRRRD...",
+                "....DRRRRRD....",
+                ".....DRRRD.....",
+                "......DD.......",
+                "................",
+                "................",
+                "................",
+                "................"
+            },
+            new System.Collections.Generic.Dictionary<char, Color32>
+            {
+                ['D'] = new Color32(78, 12, 20, 255),
+                ['R'] = new Color32(218, 38, 49, 255),
+                ['H'] = new Color32(255, 126, 128, 255)
+            });
     }
 
     private void OnGUI()
@@ -44,7 +73,8 @@ public class PlayerHealthHUD : MonoBehaviour
 
         GUI.color = Color.white;
         GUI.Label(new Rect(panelRect.x + 17f, panelRect.y + 10f, 170f, 25f), "Health", labelStyle);
-        GUI.Label(new Rect(panelRect.x + 174f, panelRect.y + 10f, 158f, 25f),
+        GUI.DrawTexture(new Rect(panelRect.x + 193f, panelRect.y + 13f, 18f, 18f), heartTexture);
+        GUI.Label(new Rect(panelRect.x + 215f, panelRect.y + 10f, 117f, 25f),
             playerHealth.CurrentHealth + " / " + playerHealth.MaxHealth, valueStyle);
 
         Rect barFrame = new Rect(panelRect.x + 14f, panelRect.y + 49f, 322f, 28f);
@@ -62,6 +92,14 @@ public class PlayerHealthHUD : MonoBehaviour
 
         GUI.color = previousColor;
         GUI.matrix = previousMatrix;
+    }
+
+    private void OnDestroy()
+    {
+        if (heartTexture != null)
+        {
+            Destroy(heartTexture);
+        }
     }
 
     private void EnsureStyles()
@@ -83,7 +121,7 @@ public class PlayerHealthHUD : MonoBehaviour
         {
             fontSize = 16,
             fontStyle = FontStyle.Bold,
-            alignment = TextAnchor.MiddleRight,
+            alignment = TextAnchor.MiddleLeft,
             normal = { textColor = Color.white }
         };
     }
