@@ -673,10 +673,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyTemplate: {fileID: 1200770407}
+  impAnimatorController: {fileID: 9100000, guid: d07315550eb64b7ea7f2f60f51e036ff, type: 2}
   hordeDuration: 60
   spawnInterval: 2
-  enemiesPerSpawn: 2
-  maxAliveEnemies: 24
+  puglinsPerSpawn: 2
+  impsPerSpawn: 1
+  maxAlivePuglins: 24
+  maxAliveImps: 12
+  maxAliveEnemies: 36
   minSpawnRadius: 8
   maxSpawnRadius: 12
   terrainEdgeMargin: 2

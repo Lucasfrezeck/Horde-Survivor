@@ -80,6 +80,12 @@ public class EnemyHealth : MonoBehaviour
             enemyAI.enabled = false;
         }
 
+        EnemyRangedAI rangedAI = GetComponent<EnemyRangedAI>();
+        if (rangedAI != null)
+        {
+            rangedAI.enabled = false;
+        }
+
         CharacterController characterController = GetComponent<CharacterController>();
         if (characterController != null)
         {
