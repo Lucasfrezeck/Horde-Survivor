@@ -4,7 +4,6 @@ public class HordeSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject enemyTemplate;
     [SerializeField] private RuntimeAnimatorController impAnimatorController;
-    [SerializeField] private float hordeDuration = 60f;
     [SerializeField] private float spawnInterval = 2f;
     [SerializeField] private int puglinsPerSpawn = 2;
     [SerializeField] private int impsPerSpawn = 1;
@@ -15,7 +14,6 @@ public class HordeSpawner : MonoBehaviour
     [SerializeField] private float maxSpawnRadius = 12f;
     [SerializeField] private float terrainEdgeMargin = 2f;
 
-    private float hordeStartTime;
     private float nextSpawnTime;
     private GameObject impModel;
 
@@ -42,14 +40,12 @@ public class HordeSpawner : MonoBehaviour
 
     private void Start()
     {
-        hordeStartTime = Time.timeSinceLevelLoad;
-        nextSpawnTime = hordeStartTime;
+        nextSpawnTime = Time.timeSinceLevelLoad;
     }
 
     private void Update()
     {
-        float elapsedTime = Time.timeSinceLevelLoad - hordeStartTime;
-        if (elapsedTime >= hordeDuration || Time.timeSinceLevelLoad < nextSpawnTime)
+        if (Time.timeSinceLevelLoad < nextSpawnTime)
         {
             return;
         }

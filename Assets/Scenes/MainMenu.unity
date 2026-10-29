@@ -679,7 +679,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyTemplate: {fileID: 1200770407}
   impAnimatorController: {fileID: 9100000, guid: d07315550eb64b7ea7f2f60f51e036ff, type: 2}
-  hordeDuration: 60
   spawnInterval: 2
   puglinsPerSpawn: 2
   impsPerSpawn: 1
