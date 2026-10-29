@@ -5,11 +5,11 @@ public class HordeSpawner : MonoBehaviour
     [SerializeField] private GameObject enemyTemplate;
     [SerializeField] private RuntimeAnimatorController impAnimatorController;
     [SerializeField] private float spawnInterval = 2f;
-    [SerializeField] private int puglinsPerSpawn = 2;
-    [SerializeField] private int impsPerSpawn = 1;
-    [SerializeField] private int maxAlivePuglins = 24;
-    [SerializeField] private int maxAliveImps = 12;
-    [SerializeField] private int maxAliveEnemies = 36;
+    [SerializeField] private int puglinsPerSpawn = 12;
+    [SerializeField] private int impsPerSpawn = 6;
+    [SerializeField] private int maxAlivePuglins = 144;
+    [SerializeField] private int maxAliveImps = 72;
+    [SerializeField] private int maxAliveEnemies = 216;
     [SerializeField] private float minSpawnRadius = 8f;
     [SerializeField] private float maxSpawnRadius = 12f;
     [SerializeField] private float terrainEdgeMargin = 2f;
