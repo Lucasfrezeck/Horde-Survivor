@@ -30,6 +30,14 @@ public class EnemyHealthBar : MonoBehaviour
         UpdateHealth(enemyHealth.CurrentHealth, enemyHealth.MaxHealth);
     }
 
+    public void HideImmediately()
+    {
+        if (barRoot != null)
+        {
+            barRoot.SetActive(false);
+        }
+    }
+
     private void LateUpdate()
     {
         Camera mainCamera = Camera.main;
@@ -56,7 +64,13 @@ public class EnemyHealthBar : MonoBehaviour
 
         healthFill.fillAmount = maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f;
 
-        if (currentHealth < maxHealth && currentHealth > 0)
+        if (currentHealth <= 0)
+        {
+            HideImmediately();
+            return;
+        }
+
+        if (currentHealth < maxHealth)
         {
             barRoot.SetActive(true);
             if (hideRoutine != null)
