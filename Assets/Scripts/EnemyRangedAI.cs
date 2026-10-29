@@ -37,7 +37,8 @@ public class EnemyRangedAI : MonoBehaviour
     private bool isCasting;
     private bool projectileSpawned;
     private bool spellAnimationStarted;
-    private readonly EnemyPatrol patrol = new EnemyPatrol();
+    private EnemyPatrol patrol;
+    private EnemyNavigation navigation;
 
     private void OnEnable()
     {
@@ -69,6 +70,8 @@ public class EnemyRangedAI : MonoBehaviour
 
     private void Start()
     {
+        patrol = new EnemyPatrol();
+        navigation = new EnemyNavigation();
         playerHealth = FindFirstObjectByType<PlayerHealth>();
         animator = GetComponentInChildren<Animator>();
         characterController = GetComponent<CharacterController>();
@@ -88,6 +91,8 @@ public class EnemyRangedAI : MonoBehaviour
 
     private void Update()
     {
+        patrol ??= new EnemyPatrol();
+        navigation ??= new EnemyNavigation();
         if (playerHealth != null && playerHealth.CurrentHealth <= 0)
         {
             isCasting = false;
@@ -105,7 +110,8 @@ public class EnemyRangedAI : MonoBehaviour
 
         Vector3 directionToPlayer = GetFlatDirectionToPlayer();
         float distanceToPlayer = GetFlatDistanceToPlayer();
-        RotateToward(directionToPlayer);
+        RotateToward(distanceToPlayer > attackRange || !EnemyNavigation.CanSee(transform, playerHealth)
+            ? navigation.Direction(transform.position, playerHealth.transform.position) : directionToPlayer);
 
         if (isCasting)
         {
@@ -113,7 +119,7 @@ public class EnemyRangedAI : MonoBehaviour
             return;
         }
 
-        if (distanceToPlayer > attackRange)
+        if (distanceToPlayer > attackRange || !EnemyNavigation.CanSee(transform, playerHealth))
         {
             SetMovingAnimation(true);
             MoveTowardPlayer(directionToPlayer);
@@ -271,11 +277,12 @@ public class EnemyRangedAI : MonoBehaviour
 
     private void MoveTowardPlayer(Vector3 directionToPlayer)
     {
-        Vector3 movementDirection = (directionToPlayer + GetSeparationDirection() * separationStrength).normalized;
+        Vector3 route = navigation.Direction(transform.position, playerHealth.transform.position);
+        Vector3 movementDirection = (route + GetSeparationDirection() * separationStrength).normalized;
         Vector3 movement = movementDirection * moveSpeed * Time.deltaTime;
         if (characterController != null)
         {
-            characterController.Move(movement);
+            characterController.SimpleMove(movementDirection * moveSpeed);
         }
         else
         {

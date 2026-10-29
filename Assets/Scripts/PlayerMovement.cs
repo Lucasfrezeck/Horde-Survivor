@@ -54,6 +54,6 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Cálculo de movimento
-        controller.Move(direction * Time.deltaTime * playerStats.moveSpeed);
+        controller.SimpleMove(direction * playerStats.moveSpeed);
     }
 }

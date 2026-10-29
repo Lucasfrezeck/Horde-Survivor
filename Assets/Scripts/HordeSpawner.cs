@@ -106,7 +106,7 @@ public class HordeSpawner : MonoBehaviour
 
     private void InstantiatePuglin(float groupAngle)
     {
-        Vector3 spawnPosition = GetRandomGroupSpawnPosition(groupAngle);
+        if (!TryGetRandomGroupSpawnPosition(groupAngle, out Vector3 spawnPosition)) return;
         GameObject enemy = Instantiate(enemyTemplate, spawnPosition, Quaternion.identity);
         enemy.name = "Puglin";
         enemy.SetActive(true);
@@ -114,7 +114,7 @@ public class HordeSpawner : MonoBehaviour
 
     private void InstantiateImp(float groupAngle)
     {
-        Vector3 spawnPosition = GetRandomGroupSpawnPosition(groupAngle);
+        if (!TryGetRandomGroupSpawnPosition(groupAngle, out Vector3 spawnPosition)) return;
         GameObject imp = new GameObject("Imp");
         imp.transform.SetPositionAndRotation(spawnPosition, Quaternion.identity);
 
@@ -137,11 +137,22 @@ public class HordeSpawner : MonoBehaviour
         rangedAI.Initialize(impAnimatorController);
     }
 
-    private Vector3 GetRandomGroupSpawnPosition(float groupAngle)
+    private bool TryGetRandomGroupSpawnPosition(float groupAngle, out Vector3 spawnPosition)
     {
-        float angle = groupAngle + Random.Range(-25f, 25f);
-        float radius = Random.Range(minSpawnRadius, maxSpawnRadius);
-        return GetSpawnPosition(angle, radius);
+        for (int attempt = 0; attempt < 20; attempt++)
+        {
+            float angle = attempt < 10 ? groupAngle + Random.Range(-25f, 25f) : Random.Range(0f, 360f);
+            Vector3 candidate = GetSpawnPosition(angle, Random.Range(minSpawnRadius, maxSpawnRadius));
+            if (EnemyNavigation.TrySpawn(candidate, transform.position, out spawnPosition))
+            {
+                Vector3 offset = spawnPosition - transform.position;
+                offset.y = 0f;
+                if (offset.magnitude >= minSpawnRadius - 0.5f && offset.magnitude <= maxSpawnRadius + 0.5f)
+                    return true;
+            }
+        }
+        spawnPosition = default;
+        return false;
     }
 
     private Vector3 GetSpawnPosition(float angleDegrees, float radius)

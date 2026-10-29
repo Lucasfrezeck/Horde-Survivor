@@ -38,7 +38,8 @@ public class EnemyMeleeAI : MonoBehaviour
     private bool isWindingUp;
     private bool attackHitApplied;
     private bool attackAnimationStarted;
-    private readonly EnemyPatrol patrol = new EnemyPatrol();
+    private EnemyPatrol patrol;
+    private EnemyNavigation navigation;
 
     private void OnEnable()
     {
@@ -55,6 +56,8 @@ public class EnemyMeleeAI : MonoBehaviour
 
     private void Start()
     {
+        patrol = new EnemyPatrol();
+        navigation = new EnemyNavigation();
         playerHealth = FindFirstObjectByType<PlayerHealth>();
         animator = GetComponentInChildren<Animator>();
         characterController = GetComponent<CharacterController>();
@@ -73,6 +76,9 @@ public class EnemyMeleeAI : MonoBehaviour
 
     private void Update()
     {
+        // Managed helper fields can also be cleared by an Editor script reload.
+        patrol ??= new EnemyPatrol();
+        navigation ??= new EnemyNavigation();
         if (playerHealth != null && playerHealth.CurrentHealth <= 0)
         {
             isWindingUp = false;
@@ -90,7 +96,8 @@ public class EnemyMeleeAI : MonoBehaviour
 
         Vector3 toPlayer = GetFlatDirectionToPlayer();
         float distanceToPlayer = GetFlatDistanceToPlayer();
-        RotateToward(toPlayer);
+        RotateToward(distanceToPlayer > attackRange || !EnemyNavigation.CanSee(transform, playerHealth)
+            ? navigation.Direction(transform.position, playerHealth.transform.position) : toPlayer);
 
         if (isWindingUp)
         {
@@ -162,7 +169,7 @@ public class EnemyMeleeAI : MonoBehaviour
             return;
         }
 
-        SetMovingAnimation(distanceToPlayer > attackRange);
+        SetMovingAnimation(distanceToPlayer > attackRange || !EnemyNavigation.CanSee(transform, playerHealth));
         MoveTowardPlayer(toPlayer, distanceToPlayer);
     }
 
@@ -221,7 +228,8 @@ public class EnemyMeleeAI : MonoBehaviour
 
     private bool CanAttack(float distanceToPlayer, Vector3 directionToPlayer)
     {
-        if (distanceToPlayer > attackRange || directionToPlayer.sqrMagnitude <= 0f)
+        if (distanceToPlayer > attackRange || directionToPlayer.sqrMagnitude <= 0f
+            || !EnemyNavigation.CanSee(transform, playerHealth))
         {
             return false;
         }
@@ -246,17 +254,19 @@ public class EnemyMeleeAI : MonoBehaviour
 
     private void MoveTowardPlayer(Vector3 directionToPlayer, float distanceToPlayer)
     {
-        if (distanceToPlayer <= attackRange || directionToPlayer.sqrMagnitude <= 0f)
+        if ((distanceToPlayer <= attackRange && EnemyNavigation.CanSee(transform, playerHealth))
+            || directionToPlayer.sqrMagnitude <= 0f)
         {
             return;
         }
 
         Vector3 separation = GetSeparationDirection();
-        Vector3 movementDirection = (directionToPlayer + separation * separationStrength).normalized;
+        Vector3 route = navigation.Direction(transform.position, playerHealth.transform.position);
+        Vector3 movementDirection = (route + separation * separationStrength).normalized;
         Vector3 movement = movementDirection * moveSpeed * Time.deltaTime;
         if (characterController != null)
         {
-            characterController.Move(movement);
+            characterController.SimpleMove(movementDirection * moveSpeed);
         }
         else
         {

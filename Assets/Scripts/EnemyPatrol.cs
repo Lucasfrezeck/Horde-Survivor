@@ -12,10 +12,12 @@ public sealed class EnemyPatrol
     private float waitUntil;
     private bool started;
     private bool waiting;
+    private EnemyNavigation navigation;
 
     public void Tick(Transform actor, CharacterController controller, Animator animator,
         float moveSpeed, float turnSpeed, float referenceSpeed, float animationSpeed, Vector3 separation)
     {
+        navigation ??= new EnemyNavigation();
         if (!started)
         {
             started = true;
@@ -43,7 +45,8 @@ public sealed class EnemyPatrol
         }
 
         float patrolSpeed = Mathf.Max(0f, moveSpeed) * 0.55f;
-        Vector3 direction = waiting ? Vector3.zero : (offset.normalized + separation).normalized;
+        Vector3 route = navigation.Direction(actor.position, destination);
+        Vector3 direction = waiting ? Vector3.zero : (route + separation).normalized;
         if (direction.sqrMagnitude > 0.001f)
         {
             actor.rotation = Quaternion.RotateTowards(actor.rotation,

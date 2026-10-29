@@ -960,6 +960,7 @@ GameObject:
   - component: {fileID: 1218937875}
   - component: {fileID: 1218937874}
   - component: {fileID: 1218937873}
+  - component: {fileID: 2000000100}
   m_Layer: 0
   m_Name: Terrain_Desert
   m_TagString: Untagged
@@ -1234,6 +1235,21 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 02e7184caa8218d4c9ce34fcf314e590, type: 3}
   m_PrefabInstance: {fileID: 1742134567}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2000000100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1218937872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92f7bea146bd45b7993d4554e3315ade, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  areaMultiplier: 6
+  seed: 5371
+  sandstoneMaterial: {fileID: 2100000, guid: 1007319ff2224d1dae2ae40660f628d5, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
