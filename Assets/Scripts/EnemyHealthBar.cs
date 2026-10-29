@@ -4,7 +4,8 @@ using UnityEngine.UI;
 
 public class EnemyHealthBar : MonoBehaviour
 {
-    [SerializeField] private float visibleDuration = 2.5f;
+    [SerializeField] private float visibleDuration = 0.5f;
+    [SerializeField, Min(0f)] private float fillTransitionDuration = 0.2f;
     [SerializeField] private float heightOffset = 1.45f;
 
     private static readonly Color GoldColor = new Color(0.58f, 0.40f, 0.19f, 1f);
@@ -16,6 +17,7 @@ public class EnemyHealthBar : MonoBehaviour
     private GameObject barRoot;
     private Image healthFill;
     private Coroutine hideRoutine;
+    private Coroutine fillRoutine;
 
     public void Initialize(EnemyHealth health)
     {
@@ -28,14 +30,6 @@ public class EnemyHealthBar : MonoBehaviour
         enemyHealth.HealthChanged += UpdateHealth;
         CreateBar();
         UpdateHealth(enemyHealth.CurrentHealth, enemyHealth.MaxHealth);
-    }
-
-    public void HideImmediately()
-    {
-        if (barRoot != null)
-        {
-            barRoot.SetActive(false);
-        }
     }
 
     private void LateUpdate()
@@ -62,17 +56,21 @@ public class EnemyHealthBar : MonoBehaviour
             return;
         }
 
-        healthFill.fillAmount = maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f;
-
-        if (currentHealth <= 0)
-        {
-            HideImmediately();
-            return;
-        }
+        float targetFill = maxHealth > 0
+            ? Mathf.Clamp01((float)currentHealth / maxHealth)
+            : 0f;
 
         if (currentHealth < maxHealth)
         {
             barRoot.SetActive(true);
+
+            if (fillRoutine != null)
+            {
+                StopCoroutine(fillRoutine);
+            }
+
+            fillRoutine = StartCoroutine(AnimateFill(targetFill));
+
             if (hideRoutine != null)
             {
                 StopCoroutine(hideRoutine);
@@ -80,6 +78,32 @@ public class EnemyHealthBar : MonoBehaviour
 
             hideRoutine = StartCoroutine(HideAfterDelay());
         }
+    }
+
+    private IEnumerator AnimateFill(float targetFill)
+    {
+        float startFill = healthFill.fillAmount;
+        if (fillTransitionDuration <= 0f)
+        {
+            healthFill.fillAmount = targetFill;
+            fillRoutine = null;
+            yield break;
+        }
+
+        healthFill.fillAmount = startFill;
+        yield return null;
+
+        float elapsed = 0f;
+        while (elapsed < fillTransitionDuration)
+        {
+            elapsed += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsed / fillTransitionDuration);
+            healthFill.fillAmount = Mathf.Lerp(startFill, targetFill, progress);
+            yield return null;
+        }
+
+        healthFill.fillAmount = targetFill;
+        fillRoutine = null;
     }
 
     private IEnumerator HideAfterDelay()
@@ -94,7 +118,8 @@ public class EnemyHealthBar : MonoBehaviour
         GameObject canvasObject = new GameObject("Enemy Health Bar", typeof(RectTransform), typeof(Canvas));
         canvasObject.transform.SetParent(transform, false);
         canvasObject.transform.localPosition = Vector3.up * heightOffset;
-        canvasObject.transform.localScale = Vector3.one * 0.01f;
+        // This halves the current bar area while preserving its proportions.
+        canvasObject.transform.localScale = Vector3.one * 0.005f;
 
         Canvas canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
@@ -125,6 +150,7 @@ public class EnemyHealthBar : MonoBehaviour
         healthFill = fillRect.gameObject.AddComponent<Image>();
         healthFill.sprite = GetWhiteSprite();
         healthFill.color = HealthColor;
+        healthFill.fillAmount = 1f;
         healthFill.type = Image.Type.Filled;
         healthFill.fillMethod = Image.FillMethod.Horizontal;
         healthFill.fillOrigin = (int)Image.OriginHorizontal.Left;

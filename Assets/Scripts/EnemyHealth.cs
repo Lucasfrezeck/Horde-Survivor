@@ -71,12 +71,6 @@ public class EnemyHealth : MonoBehaviour
 
     private IEnumerator DeathSequence()
     {
-        EnemyHealthBar healthBar = GetComponent<EnemyHealthBar>();
-        if (healthBar != null)
-        {
-            healthBar.HideImmediately();
-        }
-
         corpseRenderers = GetComponentsInChildren<Renderer>();
         keepCorpseAboveGround = true;
 
