@@ -7,7 +7,7 @@ public class PlayerHealth : MonoBehaviour
     private static readonly int HitVariantParameter = Animator.StringToHash("HitVariant");
     private static readonly int HitHeadState = Animator.StringToHash("Hit Reaction.Armature|Hit_Head");
     private static readonly int HitChestState = Animator.StringToHash("Hit Reaction.Armature|Hit_Chest");
-    private const int HitReactionLayer = 1;
+    private const int HitReactionLayer = 2;
 
     // Referencia os atributos e as animações do jogador.
     private PlayerStats playerStats;

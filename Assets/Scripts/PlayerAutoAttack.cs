@@ -8,7 +8,7 @@ public class PlayerAutoAttack : MonoBehaviour
     private static readonly int AttackVariantParameter = Animator.StringToHash("AttackVariant");
     private static readonly int PunchCrossState = Animator.StringToHash("Attack.Armature|Punch_Cross");
     private static readonly int PunchJabState = Animator.StringToHash("Attack.Armature|Punch_Jab");
-    private const int AttackLayer = 2;
+    private const int AttackLayer = 1;
 
     [SerializeField] private Transform attackOrigin;
     [SerializeField, Range(0.05f, 0.9f)] private float punchCrossImpactTime = 0.4f;

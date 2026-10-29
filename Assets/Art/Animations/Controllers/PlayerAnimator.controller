@@ -80,9 +80,9 @@ AnimatorController:
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
   - serializedVersion: 5
-    m_Name: Hit Reaction
-    m_StateMachine: {fileID: 5912294400088180042}
-    m_Mask: {fileID: 31900000, guid: 96cc7f0f956d4d9caa11f9314a9d2e77, type: 2}
+    m_Name: Attack
+    m_StateMachine: {fileID: -6842501937164825001}
+    m_Mask: {fileID: 31900000, guid: e2b16ca14ce3401daed9ca7528734a91, type: 2}
     m_Motions: []
     m_Behaviours: []
     m_BlendingMode: 0
@@ -92,9 +92,9 @@ AnimatorController:
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
   - serializedVersion: 5
-    m_Name: Attack
-    m_StateMachine: {fileID: -6842501937164825001}
-    m_Mask: {fileID: 31900000, guid: e2b16ca14ce3401daed9ca7528734a91, type: 2}
+    m_Name: Hit Reaction
+    m_StateMachine: {fileID: 5912294400088180042}
+    m_Mask: {fileID: 31900000, guid: 96cc7f0f956d4d9caa11f9314a9d2e77, type: 2}
     m_Motions: []
     m_Behaviours: []
     m_BlendingMode: 0
