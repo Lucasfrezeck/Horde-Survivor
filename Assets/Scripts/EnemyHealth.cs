@@ -17,6 +17,7 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField, Min(0f)] private float corpseGroundClearance = 0.02f;
 
     public int maxHealth = 30;
+    [Min(0)] public int experienceReward = 1;
     private int currentHealth;
     private Renderer[] corpseRenderers;
     private readonly List<Vector3> bakedCorpseVertices = new List<Vector3>();
@@ -27,6 +28,7 @@ public class EnemyHealth : MonoBehaviour
     public int MaxHealth => Mathf.Max(0, maxHealth);
     public event Action<int, int> HealthChanged;
     public static event Action EnemyKilled;
+    public static event Action<EnemyHealth> EnemyDefeated;
 
     private void LateUpdate()
     {
@@ -64,6 +66,7 @@ public class EnemyHealth : MonoBehaviour
         if (currentHealth == 0)
         {
             EnemyKilled?.Invoke();
+            EnemyDefeated?.Invoke(this);
             StartCoroutine(DeathSequence());
         }
     }

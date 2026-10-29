@@ -11,6 +11,7 @@ public class PlayerLookAtMouse : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Time.timeScale <= 0f) return;
         // pega a posição do cursor e calcula uma linha invisível que vai da câmera até o mundo
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 

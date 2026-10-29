@@ -62,6 +62,8 @@ public class PlayerHealth : MonoBehaviour
         Debug.Log("Você tem " + currentHealth + " de vida.");
         if (GetComponent<GameOverScreen>() == null)
             gameObject.AddComponent<GameOverScreen>();
+        if (GetComponent<PlayerExperience>() == null)
+            gameObject.AddComponent<PlayerExperience>();
     }
 
     private void Update()
@@ -87,6 +89,7 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (Time.timeScale <= 0f) return;
         if (damage <= 0 || isDead || currentHealth <= 0)
         {
             return;
@@ -103,6 +106,22 @@ public class PlayerHealth : MonoBehaviour
         }
 
         PlayHitReaction();
+    }
+
+    public void Heal(int amount)
+    {
+        if (amount <= 0 || isDead || currentHealth <= 0 || playerStats == null) return;
+        currentHealth = Mathf.Min(MaxHealth, currentHealth + amount);
+        HealthChanged?.Invoke(currentHealth, MaxHealth);
+    }
+
+    public void IncreaseMaximumHealth(int amount)
+    {
+        if (amount <= 0 || isDead || playerStats == null) return;
+        bool wasAtMaximumHealth = currentHealth == MaxHealth;
+        playerStats.maxHealth += amount;
+        if (wasAtMaximumHealth) currentHealth = MaxHealth;
+        HealthChanged?.Invoke(currentHealth, MaxHealth);
     }
 
     private void PlayDeathAnimation()

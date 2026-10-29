@@ -56,6 +56,7 @@ public class HordeSpawner : MonoBehaviour
 
     private void Update()
     {
+        if (Time.timeScale <= 0f) return;
         if (spawnRoutine != null || Time.timeSinceLevelLoad < nextSpawnTime)
         {
             return;
@@ -94,12 +95,14 @@ public class HordeSpawner : MonoBehaviour
         // Spread model, Animator and health-bar creation across frames instead of cloning 18 at once.
         for (int i = 0; i < puglinSpawnCount; i++)
         {
+            while (Time.timeScale <= 0f) yield return null;
             InstantiatePuglin(groupAngle);
             yield return null;
         }
 
         for (int i = 0; i < impSpawnCount; i++)
         {
+            while (Time.timeScale <= 0f) yield return null;
             InstantiateImp(groupAngle);
             yield return null;
         }
@@ -172,6 +175,7 @@ public class HordeSpawner : MonoBehaviour
 
         EnemyHealth health = imp.AddComponent<EnemyHealth>();
         health.maxHealth = 60;
+        health.experienceReward = 2;
 
         EnemyRangedAI rangedAI = imp.AddComponent<EnemyRangedAI>();
         rangedAI.Initialize(impAnimatorController);

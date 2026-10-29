@@ -26,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Time.timeScale <= 0f) return;
         //Variavel que armazena o valor lido do movimento do eixo horizontal
         float horizontal = Input.GetAxisRaw("Horizontal");
         

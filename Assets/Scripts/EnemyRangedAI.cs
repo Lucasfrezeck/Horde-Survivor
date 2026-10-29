@@ -92,6 +92,7 @@ public class EnemyRangedAI : MonoBehaviour
 
     private void Update()
     {
+        if (Time.timeScale <= 0f) return;
         patrol ??= new EnemyPatrol();
         navigation ??= new EnemyNavigation();
         if (playerHealth != null && playerHealth.CurrentHealth <= 0)

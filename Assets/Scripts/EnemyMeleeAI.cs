@@ -77,6 +77,7 @@ public class EnemyMeleeAI : MonoBehaviour
 
     private void Update()
     {
+        if (Time.timeScale <= 0f) return;
         // Managed helper fields can also be cleared by an Editor script reload.
         patrol ??= new EnemyPatrol();
         navigation ??= new EnemyNavigation();

@@ -27,6 +27,7 @@ public class CameraFollow : MonoBehaviour
 
     void Update()
     {
+        if (Time.timeScale <= 0f) return;
         //Lê todo frame o input da ScrollWheel
         float scroll = Input.GetAxis("Mouse ScrollWheel");
 

@@ -6,6 +6,7 @@ public class PlayerAutoAttack : MonoBehaviour
 {
     private static readonly int AttackParameter = Animator.StringToHash("Attack");
     private static readonly int AttackVariantParameter = Animator.StringToHash("AttackVariant");
+    private static readonly int AttackAnimationSpeedParameter = Animator.StringToHash("AttackAnimationSpeed");
     private static readonly int PunchCrossState = Animator.StringToHash("Attack.Armature|Punch_Cross");
     private static readonly int PunchJabState = Animator.StringToHash("Attack.Armature|Punch_Jab");
     private const int AttackLayer = 1;
@@ -19,6 +20,7 @@ public class PlayerAutoAttack : MonoBehaviour
     [SerializeField, Range(8, 48)] private int attackAreaSegments = 24;
 
     private PlayerStats playerStats;
+    private float baseAttackSpeed;
     private Animator animator;
     private float nextAttackTime;
     private float attackStartedTime;
@@ -29,6 +31,7 @@ public class PlayerAutoAttack : MonoBehaviour
     private int currentAttackVariant;
     private GameObject attackAreaObject;
     private Material attackAreaMaterial;
+    private float attackAreaRange;
     private Coroutine attackAreaFade;
 
     private void Start()
@@ -45,10 +48,12 @@ public class PlayerAutoAttack : MonoBehaviour
         }
 
         CreateAttackAreaEffect();
+        baseAttackSpeed = Mathf.Max(0.01f, playerStats.attackSpeed);
     }
 
     private void Update()
     {
+        if (Time.timeScale <= 0f) return;
         if (playerStats == null || playerStats.attackSpeed <= 0f)
         {
             return;
@@ -79,6 +84,7 @@ public class PlayerAutoAttack : MonoBehaviour
 
         if (animator != null && animator.runtimeAnimatorController != null)
         {
+            animator.SetFloat(AttackAnimationSpeedParameter, playerStats.attackSpeed / Mathf.Max(0.01f, baseAttackSpeed));
             if (animator.layerCount > AttackLayer)
             {
                 animator.SetLayerWeight(AttackLayer, 1f);
@@ -259,6 +265,7 @@ public class PlayerAutoAttack : MonoBehaviour
         MeshFilter meshFilter = attackAreaObject.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = attackAreaObject.AddComponent<MeshRenderer>();
         meshFilter.sharedMesh = CreateAttackAreaMesh();
+        attackAreaRange = playerStats.attackRange;
         meshRenderer.sharedMaterial = attackAreaMaterial;
         meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
         meshRenderer.receiveShadows = false;
@@ -307,6 +314,14 @@ public class PlayerAutoAttack : MonoBehaviour
         if (attackAreaFade != null)
         {
             StopCoroutine(attackAreaFade);
+        }
+
+        if (!Mathf.Approximately(attackAreaRange, playerStats.attackRange))
+        {
+            MeshFilter filter = attackAreaObject.GetComponent<MeshFilter>();
+            Destroy(filter.sharedMesh);
+            filter.sharedMesh = CreateAttackAreaMesh();
+            attackAreaRange = playerStats.attackRange;
         }
 
         Vector3 position = origin;
