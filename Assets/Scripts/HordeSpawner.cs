@@ -7,10 +7,10 @@ public class HordeSpawner : MonoBehaviour
     [SerializeField] private RuntimeAnimatorController impAnimatorController;
     [SerializeField] private float spawnInterval = 2f;
     [SerializeField] private int puglinsPerSpawn = 12;
-    [SerializeField] private int impsPerSpawn = 6;
+    [SerializeField] private int impsPerSpawn = 3;
     [SerializeField] private int maxAlivePuglins = 144;
-    [SerializeField] private int maxAliveImps = 72;
-    [SerializeField] private int maxAliveEnemies = 216;
+    [SerializeField] private int maxAliveImps = 36;
+    [SerializeField] private int maxAliveEnemies = 180;
     [Header("Horde pressure and breathing room")]
     [SerializeField, Min(0.1f)] private float reinforcementDuration = 12f;
     [SerializeField, Min(0f)] private float minimumRestDuration = 8f;
@@ -176,6 +176,7 @@ public class HordeSpawner : MonoBehaviour
         EnemyHealth health = imp.AddComponent<EnemyHealth>();
         health.maxHealth = 60;
         health.experienceReward = 2;
+        health.healthDropChance = 0.03f;
 
         EnemyRangedAI rangedAI = imp.AddComponent<EnemyRangedAI>();
         rangedAI.Initialize(impAnimatorController);

@@ -18,6 +18,7 @@ public class EnemyHealth : MonoBehaviour
 
     public int maxHealth = 30;
     [Min(0)] public int experienceReward = 1;
+    [Range(0f, 1f)] public float healthDropChance;
     private int currentHealth;
     private Renderer[] corpseRenderers;
     private readonly List<Vector3> bakedCorpseVertices = new List<Vector3>();

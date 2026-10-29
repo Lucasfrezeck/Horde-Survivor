@@ -680,10 +680,10 @@ MonoBehaviour:
   impAnimatorController: {fileID: 9100000, guid: d07315550eb64b7ea7f2f60f51e036ff, type: 2}
   spawnInterval: 2
   puglinsPerSpawn: 12
-  impsPerSpawn: 6
+  impsPerSpawn: 3
   maxAlivePuglins: 144
-  maxAliveImps: 72
-  maxAliveEnemies: 216
+  maxAliveImps: 36
+  maxAliveEnemies: 180
   reinforcementDuration: 12
   minimumRestDuration: 8
   minimumPopulationFraction: 0.55

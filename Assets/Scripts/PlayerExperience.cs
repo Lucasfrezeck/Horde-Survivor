@@ -7,6 +7,7 @@ public class PlayerExperience : MonoBehaviour
 {
     [SerializeField, Min(0.5f)] private float baseCollectionRadius = 3f;
     [SerializeField, Min(1)] private int maximumCrystals = 256;
+    [SerializeField, Min(1)] private int maximumHearts = 64;
     private const int MaximumUpgradeRank = 5;
     private const int HealUpgrade = 6;
     private const float CrystalBottomExtent = 0.7f;
@@ -23,9 +24,11 @@ public class PlayerExperience : MonoBehaviour
         public int value;
         public bool attracted;
         public float phase;
+        public bool healing;
     }
     private readonly List<Orb> orbs = new List<Orb>();
     private readonly Stack<Orb> pool = new Stack<Orb>();
+    private readonly Stack<Orb> heartPool = new Stack<Orb>();
     private readonly int[] ranks = new int[7];
     private readonly ExperienceProgress progress = new ExperienceProgress();
     private PlayerHealth health;
@@ -34,6 +37,10 @@ public class PlayerExperience : MonoBehaviour
     private Transform orbRoot;
     private Mesh crystalMesh;
     private Material crystalMaterial;
+    private Mesh heartMesh;
+    private Material heartMaterial;
+    private Camera pickupCamera;
+    private bool ownsHeartMaterial;
     private bool ownsMaterial;
     private int baseDamage, baseHealth;
     private float baseAttackSpeed, baseRange, baseMovement;
@@ -54,6 +61,15 @@ public class PlayerExperience : MonoBehaviour
         collectionRadius = baseCollectionRadius;
         orbRoot = new GameObject("Experience Crystals").transform;
         crystalMesh = CreateCrystalMesh();
+        heartMesh = CreateHeartMesh();
+        pickupCamera = Camera.main;
+        heartMaterial = Resources.Load<Material>("HealthHeart");
+        if (heartMaterial == null)
+        {
+            heartMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            heartMaterial.SetColor("_BaseColor", new Color(0.9f, 0.025f, 0.06f));
+            ownsHeartMaterial = true;
+        }
         crystalMaterial = Resources.Load<Material>("ExperienceCrystal");
         if (crystalMaterial == null)
         {
@@ -69,7 +85,10 @@ public class PlayerExperience : MonoBehaviour
 
     private void DropExperience(EnemyHealth enemy)
     {
-        if (health == null || health.CurrentHealth <= 0 || progress.IsMaxLevel || enemy.experienceReward <= 0) return;
+        if (health == null || health.CurrentHealth <= 0) return;
+        if (enemy.healthDropChance > 0f && Random.value < enemy.healthDropChance)
+            DropHeart(enemy.transform.position);
+        if (progress.IsMaxLevel || enemy.experienceReward <= 0) return;
         Vector3 point = enemy.transform.position;
         Terrain terrain = Terrain.activeTerrain;
         point.y = terrain != null ? terrain.SampleHeight(point) + terrain.transform.position.y : point.y - 1f;
@@ -77,6 +96,7 @@ public class PlayerExperience : MonoBehaviour
         float closestDistance = float.PositiveInfinity;
         foreach (Orb existing in orbs)
         {
+            if (existing.healing) continue;
             float distance = (existing.surface - point).sqrMagnitude;
             if (distance < closestDistance) { closest = existing; closestDistance = distance; }
         }
@@ -100,6 +120,7 @@ public class PlayerExperience : MonoBehaviour
             orb = new Orb { transform = crystal.transform };
         }
         orb.value = enemy.experienceReward;
+        orb.healing = false;
         orb.surface = point;
         orb.attracted = false;
         orb.phase = Random.Range(0f, Mathf.PI * 2f);
@@ -109,9 +130,46 @@ public class PlayerExperience : MonoBehaviour
         orbs.Add(orb);
     }
 
+    private void DropHeart(Vector3 point)
+    {
+        int count = 0, oldest = -1;
+        for (int i = 0; i < orbs.Count; i++)
+        {
+            if (!orbs[i].healing) continue;
+            if (oldest < 0) oldest = i;
+            count++;
+        }
+        // Keep long runs bounded, reusing the oldest uncollected heart if necessary.
+        if (count >= maximumHearts && oldest >= 0) Recycle(oldest);
+        Orb orb;
+        if (heartPool.Count > 0) orb = heartPool.Pop();
+        else
+        {
+            GameObject heart = new GameObject("Health Heart (+25 HP)", typeof(MeshFilter), typeof(MeshRenderer));
+            heart.transform.SetParent(orbRoot, false);
+            heart.GetComponent<MeshFilter>().sharedMesh = heartMesh;
+            MeshRenderer renderer = heart.GetComponent<MeshRenderer>();
+            renderer.sharedMaterial = heartMaterial;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            orb = new Orb { transform = heart.transform };
+        }
+        Terrain terrain = Terrain.activeTerrain;
+        point.y = terrain != null ? terrain.SampleHeight(point) + terrain.transform.position.y : point.y - 1f;
+        orb.healing = true;
+        orb.value = 25;
+        orb.surface = point;
+        orb.attracted = false;
+        orb.phase = Random.Range(0f, Mathf.PI * 2f);
+        ScaleOrb(orb);
+        orb.transform.gameObject.SetActive(true);
+        orbs.Add(orb);
+    }
+
     private static void ScaleOrb(Orb orb)
     {
-        orb.transform.localScale = Vector3.one * Mathf.Min(0.5f, 0.24f + Mathf.Log(orb.value + 1f) * 0.035f);
+        orb.transform.localScale = Vector3.one * (orb.healing ? 0.5f
+            : Mathf.Min(0.5f, 0.24f + Mathf.Log(orb.value + 1f) * 0.035f));
         // Merged crystals grow. Recompute their resting height using the new size,
         // leaving enough clearance for the lowest point of the floating animation.
         orb.ground = orb.surface;
@@ -127,7 +185,7 @@ public class PlayerExperience : MonoBehaviour
         if (terrain != null)
         {
             surface = float.NegativeInfinity;
-            float radius = CrystalFootprintRadius * scale;
+            float radius = (orb.healing ? 0.85f : CrystalFootprintRadius) * scale;
             // Sample the footprint, not only the center, so slopes cannot cover an edge.
             for (int z = -1; z <= 1; z++)
             for (int x = -1; x <= 1; x++)
@@ -136,7 +194,7 @@ public class PlayerExperience : MonoBehaviour
                 surface = Mathf.Max(surface, terrain.SampleHeight(sample) + terrain.transform.position.y);
             }
         }
-        return surface + CrystalBottomExtent * scale + GroundClearance;
+        return surface + (orb.healing ? 0.75f : CrystalBottomExtent) * scale + GroundClearance;
     }
 
     private void Update()
@@ -146,9 +204,11 @@ public class PlayerExperience : MonoBehaviour
         for (int i = orbs.Count - 1; i >= 0; i--)
         {
             Orb orb = orbs[i];
+            bool canCollect = !orb.healing || health.CurrentHealth < health.MaxHealth;
+            if (!canCollect) orb.attracted = false;
             Vector3 offset = orb.transform.position - target;
             offset.y = 0f;
-            if (offset.sqrMagnitude <= collectionRadius * collectionRadius) orb.attracted = true;
+            if (canCollect && offset.sqrMagnitude <= collectionRadius * collectionRadius) orb.attracted = true;
             if (orb.attracted)
             {
                 Vector3 position = Vector3.MoveTowards(orb.transform.position, target, 12f * Time.deltaTime);
@@ -156,6 +216,12 @@ public class PlayerExperience : MonoBehaviour
                 orb.transform.position = position;
                 if ((orb.transform.position - target).sqrMagnitude < 0.5f)
                 {
+                    if (orb.healing)
+                    {
+                        health.Heal(25);
+                        Recycle(i);
+                        continue;
+                    }
                     int value = orb.value;
                     Recycle(i);
                     progress.Add(value);
@@ -173,7 +239,9 @@ public class PlayerExperience : MonoBehaviour
                 }
             }
             else orb.transform.position = orb.ground + Vector3.up * Mathf.Sin(Time.time * 2f + orb.phase) * BobAmplitude;
-            orb.transform.rotation = Quaternion.Euler(0f, Time.time * 45f + orb.phase * Mathf.Rad2Deg, 0f);
+            if (orb.healing && pickupCamera != null)
+                orb.transform.rotation = Quaternion.LookRotation(orb.transform.position - pickupCamera.transform.position, Vector3.up);
+            else orb.transform.rotation = Quaternion.Euler(0f, Time.time * 45f + orb.phase * Mathf.Rad2Deg, 0f);
         }
     }
 
@@ -252,10 +320,11 @@ public class PlayerExperience : MonoBehaviour
     {
         Orb orb = orbs[index];
         orb.transform.gameObject.SetActive(false);
-        pool.Push(orb);
+        if (orb.healing) heartPool.Push(orb);
+        else pool.Push(orb);
         orbs.RemoveAt(index);
     }
-    private void ClearOrbs() { for (int i = orbs.Count - 1; i >= 0; i--) Recycle(i); }
+    private void ClearOrbs() { for (int i = orbs.Count - 1; i >= 0; i--) if (!orbs[i].healing) Recycle(i); }
     private void OnDeath()
     {
         if (choosing) Time.timeScale = previousTimeScale;
@@ -270,7 +339,37 @@ public class PlayerExperience : MonoBehaviour
         ui?.Dispose();
         if (orbRoot != null) Destroy(orbRoot.gameObject);
         if (crystalMesh != null) Destroy(crystalMesh);
+        if (heartMesh != null) Destroy(heartMesh);
+        if (ownsHeartMaterial && heartMaterial != null) Destroy(heartMaterial);
         if (ownsMaterial && crystalMaterial != null) Destroy(crystalMaterial);
+    }
+
+    private static Mesh CreateHeartMesh()
+    {
+        Vector2[] outline = { new Vector2(0f, 0.35f), new Vector2(-0.35f, 0.7f),
+            new Vector2(-0.7f, 0.5f), new Vector2(-0.8f, 0.15f), new Vector2(-0.55f, -0.2f),
+            new Vector2(0f, -0.7f), new Vector2(0.55f, -0.2f), new Vector2(0.8f, 0.15f),
+            new Vector2(0.7f, 0.5f), new Vector2(0.35f, 0.7f) };
+        List<Vector3> vertices = new List<Vector3>();
+        void Triangle(Vector3 a, Vector3 b, Vector3 c) { vertices.Add(a); vertices.Add(b); vertices.Add(c); }
+        for (int i = 0; i < outline.Length; i++)
+        {
+            Vector2 a = outline[i], b = outline[(i + 1) % outline.Length];
+            Vector3 af = new Vector3(a.x, a.y, -0.18f), ab = new Vector3(a.x, a.y, 0.18f);
+            Vector3 bf = new Vector3(b.x, b.y, -0.18f), bb = new Vector3(b.x, b.y, 0.18f);
+            Triangle(Vector3.back * 0.18f, bf, af);
+            Triangle(Vector3.forward * 0.18f, ab, bb);
+            Triangle(af, bf, ab);
+            Triangle(bf, bb, ab);
+        }
+        int[] indices = new int[vertices.Count];
+        for (int i = 0; i < indices.Length; i++) indices[i] = i;
+        Mesh mesh = new Mesh { name = "Low Poly Health Heart" };
+        mesh.SetVertices(vertices);
+        mesh.triangles = indices;
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        return mesh;
     }
 
     private static Mesh CreateCrystalMesh()
