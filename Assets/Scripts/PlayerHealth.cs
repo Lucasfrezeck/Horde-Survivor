@@ -5,8 +5,12 @@ public class PlayerHealth : MonoBehaviour
 {
     private static readonly int HitParameter = Animator.StringToHash("Hit");
     private static readonly int HitVariantParameter = Animator.StringToHash("HitVariant");
+    private static readonly int AttackParameter = Animator.StringToHash("Attack");
+    private static readonly int DeathParameter = Animator.StringToHash("Death");
     private static readonly int HitHeadState = Animator.StringToHash("Hit Reaction.Armature|Hit_Head");
     private static readonly int HitChestState = Animator.StringToHash("Hit Reaction.Armature|Hit_Chest");
+    private static readonly int DeathState = Animator.StringToHash("Base Layer.Armature|Death01");
+    private const int AttackLayer = 1;
     private const int HitReactionLayer = 2;
 
     // Referencia os atributos e as animações do jogador.
@@ -14,6 +18,7 @@ public class PlayerHealth : MonoBehaviour
     private Animator animator;
     private int currentHealth;
     private bool isHitReactionPlaying;
+    private bool isDead;
     private bool hitAnimationStarted;
     private float hitReactionStartedAt;
 
@@ -79,19 +84,79 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (damage <= 0 || currentHealth <= 0)
+        if (damage <= 0 || isDead || currentHealth <= 0)
         {
             return;
         }
 
         currentHealth = Mathf.Max(0, currentHealth - damage);
         HealthChanged?.Invoke(currentHealth, MaxHealth);
-        PlayHitReaction();
-
         Debug.Log("Você recebeu " + damage + " de dano. " + currentHealth + " pontos de vida restantes.");
         if (currentHealth == 0)
         {
             Debug.Log("Você está morto.");
+            PlayDeathAnimation();
+            return;
+        }
+
+        PlayHitReaction();
+    }
+
+    private void PlayDeathAnimation()
+    {
+        isDead = true;
+        isHitReactionPlaying = false;
+        hitAnimationStarted = false;
+
+        PlayerMovement movement = GetComponent<PlayerMovement>();
+        if (movement != null)
+        {
+            movement.enabled = false;
+        }
+
+        PlayerAutoAttack autoAttack = GetComponent<PlayerAutoAttack>();
+        if (autoAttack != null)
+        {
+            autoAttack.enabled = false;
+        }
+
+        CharacterController characterController = GetComponent<CharacterController>();
+        if (characterController != null)
+        {
+            characterController.enabled = false;
+        }
+
+        if (animator == null || animator.runtimeAnimatorController == null || animator.layerCount == 0)
+        {
+            return;
+        }
+
+        if (animator.layerCount > AttackLayer)
+        {
+            animator.SetLayerWeight(AttackLayer, 0f);
+        }
+
+        if (animator.layerCount > HitReactionLayer)
+        {
+            animator.SetLayerWeight(HitReactionLayer, 0f);
+        }
+
+        animator.speed = 1f;
+        // Keep the death pose anchored at the player's world position so root motion
+        // from Death01 cannot drag the body below the terrain.
+        animator.applyRootMotion = false;
+        animator.SetFloat("Speed", 0f);
+        animator.ResetTrigger(HitParameter);
+        animator.ResetTrigger(AttackParameter);
+        animator.ResetTrigger(DeathParameter);
+
+        if (animator.HasState(0, DeathState))
+        {
+            animator.SetTrigger(DeathParameter);
+        }
+        else
+        {
+            Debug.LogError("O PlayerAnimator não contém o estado Base Layer.Armature|Death01.", this);
         }
     }
 
