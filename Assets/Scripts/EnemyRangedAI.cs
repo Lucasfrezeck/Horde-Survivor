@@ -37,6 +37,7 @@ public class EnemyRangedAI : MonoBehaviour
     private bool isCasting;
     private bool projectileSpawned;
     private bool spellAnimationStarted;
+    private readonly EnemyPatrol patrol = new EnemyPatrol();
 
     private void OnEnable()
     {
@@ -87,7 +88,15 @@ public class EnemyRangedAI : MonoBehaviour
 
     private void Update()
     {
-        if (playerHealth == null || playerHealth.CurrentHealth <= 0)
+        if (playerHealth != null && playerHealth.CurrentHealth <= 0)
+        {
+            isCasting = false;
+            patrol.Tick(transform, characterController, animator, moveSpeed, turnSpeed,
+                referenceMoveSpeed, runAnimationSpeed, GetSeparationDirection() * separationStrength);
+            return;
+        }
+
+        if (playerHealth == null)
         {
             isCasting = false;
             SetMovingAnimation(false);

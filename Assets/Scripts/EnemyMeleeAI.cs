@@ -38,6 +38,7 @@ public class EnemyMeleeAI : MonoBehaviour
     private bool isWindingUp;
     private bool attackHitApplied;
     private bool attackAnimationStarted;
+    private readonly EnemyPatrol patrol = new EnemyPatrol();
 
     private void OnEnable()
     {
@@ -72,7 +73,15 @@ public class EnemyMeleeAI : MonoBehaviour
 
     private void Update()
     {
-        if (playerHealth == null || playerHealth.CurrentHealth <= 0)
+        if (playerHealth != null && playerHealth.CurrentHealth <= 0)
+        {
+            isWindingUp = false;
+            patrol.Tick(transform, characterController, animator, moveSpeed, turnSpeed,
+                referenceMoveSpeed, runAnimationSpeed, GetSeparationDirection() * separationStrength);
+            return;
+        }
+
+        if (playerHealth == null)
         {
             isWindingUp = false;
             SetMovingAnimation(false);

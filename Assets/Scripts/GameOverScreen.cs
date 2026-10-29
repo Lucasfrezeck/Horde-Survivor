@@ -11,13 +11,11 @@ using UnityEngine.InputSystem.UI;
 public class GameOverScreen : MonoBehaviour
 {
     private static readonly Color Gold = new Color(0.72f, 0.52f, 0.25f);
-    private static readonly int DeathState = Animator.StringToHash("Base Layer.Armature|Death01");
     private PlayerHealth health;
     private CanvasGroup group;
     private GameObject canvasObject;
     private Texture2D vignetteTexture;
     private bool shown;
-    private bool paused;
     private bool restarting;
 
     private void Awake()
@@ -44,32 +42,21 @@ public class GameOverScreen : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         BuildScreen(seconds, kills);
-        StartCoroutine(RevealAndPause());
+        StartCoroutine(Reveal());
     }
 
-    private IEnumerator RevealAndPause()
+    private IEnumerator Reveal()
     {
-        Animator animator = GetComponentInChildren<Animator>();
         float elapsed = 0f;
-        while (elapsed < 8f)
+        while (elapsed < 0.65f)
         {
             elapsed += Time.unscaledDeltaTime;
             group.alpha = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / 0.65f));
             group.interactable = elapsed >= 0.65f;
-            bool animationFinished = animator == null || !animator.isActiveAndEnabled
-                || animator.runtimeAnimatorController == null || !animator.HasState(0, DeathState);
-            if (!animationFinished)
-            {
-                AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
-                animationFinished = state.fullPathHash == DeathState && state.normalizedTime >= 1f;
-            }
-            if (animationFinished && elapsed >= 0.65f) break;
             yield return null;
         }
         group.alpha = 1f;
         group.interactable = true;
-        paused = true;
-        Time.timeScale = 0f;
     }
 
     private void BuildScreen(int seconds, int kills)
@@ -158,7 +145,6 @@ public class GameOverScreen : MonoBehaviour
         restarting = true;
         StopAllCoroutines();
         Time.timeScale = 1f;
-        paused = false;
         SceneManager.LoadSceneAsync(sceneName);
     }
 
@@ -233,7 +219,6 @@ public class GameOverScreen : MonoBehaviour
     private void OnDestroy()
     {
         if (health != null) health.Died -= Show;
-        if (paused) Time.timeScale = 1f;
         if (canvasObject != null) Destroy(canvasObject);
         if (vignetteTexture != null) Destroy(vignetteTexture);
     }
