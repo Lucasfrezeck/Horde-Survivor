@@ -4,6 +4,7 @@ using UnityEngine;
 public class EnemyRangedAI : MonoBehaviour
 {
     private static readonly List<EnemyRangedAI> ActiveEnemies = new List<EnemyRangedAI>();
+    private static readonly EnemyNeighborhood Neighborhood = new EnemyNeighborhood();
     private static readonly int SpeedParameter = Animator.StringToHash("Speed");
     private static readonly int AttackParameter = Animator.StringToHash("Attack");
     private static readonly int SpellState = Animator.StringToHash("Base Layer.Armature|Spell_Simple_Shoot");
@@ -17,7 +18,7 @@ public class EnemyRangedAI : MonoBehaviour
     [Header("Spell attack")]
     [SerializeField] private float attackRange = 12f;
     [SerializeField] private int attackDamage = 15;
-    [SerializeField] private float attackCooldown = 2f;
+    [SerializeField] private float attackCooldown = 2.5f;
     [SerializeField] private float projectileSpeed = 8f;
     [SerializeField, Range(0.05f, 0.9f)] private float projectileImpactNormalizedTime = 0.4f;
     [SerializeField] private float projectileSpawnHeight = 1.5f;
@@ -110,7 +111,7 @@ public class EnemyRangedAI : MonoBehaviour
 
         Vector3 directionToPlayer = GetFlatDirectionToPlayer();
         float distanceToPlayer = GetFlatDistanceToPlayer();
-        RotateToward(distanceToPlayer > attackRange || !EnemyNavigation.CanSee(transform, playerHealth)
+        RotateToward(distanceToPlayer > attackRange || !navigation.CanSee(transform, playerHealth)
             ? navigation.Direction(transform.position, playerHealth.transform.position) : directionToPlayer);
 
         if (isCasting)
@@ -119,7 +120,7 @@ public class EnemyRangedAI : MonoBehaviour
             return;
         }
 
-        if (distanceToPlayer > attackRange || !EnemyNavigation.CanSee(transform, playerHealth))
+        if (distanceToPlayer > attackRange || !navigation.CanSee(transform, playerHealth))
         {
             SetMovingAnimation(true);
             MoveTowardPlayer(directionToPlayer);
@@ -292,26 +293,6 @@ public class EnemyRangedAI : MonoBehaviour
 
     private Vector3 GetSeparationDirection()
     {
-        Vector3 separation = Vector3.zero;
-        int neighbors = 0;
-
-        foreach (EnemyRangedAI enemy in ActiveEnemies)
-        {
-            if (enemy == this)
-            {
-                continue;
-            }
-
-            Vector3 away = transform.position - enemy.transform.position;
-            away.y = 0f;
-            float distance = away.magnitude;
-            if (distance > 0f && distance < separationRadius)
-            {
-                separation += away.normalized * (1f - distance / separationRadius);
-                neighbors++;
-            }
-        }
-
-        return neighbors > 0 ? separation / neighbors : Vector3.zero;
+        return Neighborhood.Direction(transform, separationRadius, ActiveEnemies);
     }
 }

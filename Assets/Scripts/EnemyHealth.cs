@@ -60,7 +60,6 @@ public class EnemyHealth : MonoBehaviour
         currentHealth -= damage;
         currentHealth = Mathf.Max(0, currentHealth);
         HealthChanged?.Invoke(currentHealth, MaxHealth);
-        Debug.Log(gameObject.name + "Recebeu " + damage + "de dano. Vida atual: " + currentHealth);
 
         if (currentHealth == 0)
         {

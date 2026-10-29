@@ -4,6 +4,7 @@ using UnityEngine;
 public class EnemyMeleeAI : MonoBehaviour
 {
     private static readonly List<EnemyMeleeAI> ActiveEnemies = new List<EnemyMeleeAI>();
+    private static readonly EnemyNeighborhood Neighborhood = new EnemyNeighborhood();
     private static readonly int SpeedParameter = Animator.StringToHash("Speed");
     private static readonly int AttackParameter = Animator.StringToHash("Attack");
     private static readonly int AttackState = Animator.StringToHash("Base Layer.Armature|Sword_Attack");
@@ -96,7 +97,7 @@ public class EnemyMeleeAI : MonoBehaviour
 
         Vector3 toPlayer = GetFlatDirectionToPlayer();
         float distanceToPlayer = GetFlatDistanceToPlayer();
-        RotateToward(distanceToPlayer > attackRange || !EnemyNavigation.CanSee(transform, playerHealth)
+        RotateToward(distanceToPlayer > attackRange || !navigation.CanSee(transform, playerHealth)
             ? navigation.Direction(transform.position, playerHealth.transform.position) : toPlayer);
 
         if (isWindingUp)
@@ -169,7 +170,7 @@ public class EnemyMeleeAI : MonoBehaviour
             return;
         }
 
-        SetMovingAnimation(distanceToPlayer > attackRange || !EnemyNavigation.CanSee(transform, playerHealth));
+        SetMovingAnimation(distanceToPlayer > attackRange || !navigation.CanSee(transform, playerHealth));
         MoveTowardPlayer(toPlayer, distanceToPlayer);
     }
 
@@ -229,7 +230,7 @@ public class EnemyMeleeAI : MonoBehaviour
     private bool CanAttack(float distanceToPlayer, Vector3 directionToPlayer)
     {
         if (distanceToPlayer > attackRange || directionToPlayer.sqrMagnitude <= 0f
-            || !EnemyNavigation.CanSee(transform, playerHealth))
+            || !navigation.CanSee(transform, playerHealth))
         {
             return false;
         }
@@ -254,7 +255,7 @@ public class EnemyMeleeAI : MonoBehaviour
 
     private void MoveTowardPlayer(Vector3 directionToPlayer, float distanceToPlayer)
     {
-        if ((distanceToPlayer <= attackRange && EnemyNavigation.CanSee(transform, playerHealth))
+        if ((distanceToPlayer <= attackRange && navigation.CanSee(transform, playerHealth))
             || directionToPlayer.sqrMagnitude <= 0f)
         {
             return;
@@ -276,26 +277,6 @@ public class EnemyMeleeAI : MonoBehaviour
 
     private Vector3 GetSeparationDirection()
     {
-        Vector3 separation = Vector3.zero;
-        int neighbors = 0;
-
-        foreach (EnemyMeleeAI enemy in ActiveEnemies)
-        {
-            if (enemy == this)
-            {
-                continue;
-            }
-
-            Vector3 away = transform.position - enemy.transform.position;
-            away.y = 0f;
-            float distance = away.magnitude;
-            if (distance > 0f && distance < separationRadius)
-            {
-                separation += away.normalized * (1f - distance / separationRadius);
-                neighbors++;
-            }
-        }
-
-        return neighbors > 0 ? separation / neighbors : Vector3.zero;
+        return Neighborhood.Direction(transform, separationRadius, ActiveEnemies);
     }
 }

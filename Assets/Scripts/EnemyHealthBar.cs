@@ -19,6 +19,7 @@ public class EnemyHealthBar : MonoBehaviour
     private Image healthFill;
     private Coroutine hideRoutine;
     private Coroutine fillRoutine;
+    private Camera mainCamera;
 
     public void Initialize(EnemyHealth health)
     {
@@ -30,19 +31,20 @@ public class EnemyHealthBar : MonoBehaviour
         enemyHealth = health;
         enemyHealth.HealthChanged += UpdateHealth;
         enemyRenderers = GetComponentsInChildren<Renderer>();
+        mainCamera = Camera.main;
         CreateBar();
         UpdateHealth(enemyHealth.CurrentHealth, enemyHealth.MaxHealth);
     }
 
     private void LateUpdate()
     {
-        if (barCanvas == null)
+        if (barCanvas == null || barRoot == null || !barRoot.activeSelf)
         {
             return;
         }
 
         UpdateBarPosition();
-        Camera mainCamera = Camera.main;
+        if (mainCamera == null) mainCamera = Camera.main;
         if (mainCamera != null)
         {
             barCanvas.LookAt(mainCamera.transform.position, Vector3.up);

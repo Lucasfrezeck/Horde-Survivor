@@ -94,7 +94,6 @@ public class PlayerHealth : MonoBehaviour
 
         currentHealth = Mathf.Max(0, currentHealth - damage);
         HealthChanged?.Invoke(currentHealth, MaxHealth);
-        Debug.Log("Você recebeu " + damage + " de dano. " + currentHealth + " pontos de vida restantes.");
         if (currentHealth == 0)
         {
             Debug.Log("Você está morto.");

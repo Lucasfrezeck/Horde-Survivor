@@ -684,6 +684,11 @@ MonoBehaviour:
   maxAlivePuglins: 144
   maxAliveImps: 72
   maxAliveEnemies: 216
+  reinforcementDuration: 12
+  minimumRestDuration: 8
+  minimumPopulationFraction: 0.55
+  maximumPopulationFraction: 0.85
+  resumePopulationFraction: 0.5
   minSpawnRadius: 8
   maxSpawnRadius: 12
   terrainEdgeMargin: 2
