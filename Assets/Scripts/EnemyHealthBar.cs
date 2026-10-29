@@ -13,6 +13,7 @@ public class EnemyHealthBar : MonoBehaviour
     private static Sprite whiteSprite;
 
     private EnemyHealth enemyHealth;
+    private Renderer[] enemyRenderers;
     private Transform barCanvas;
     private GameObject barRoot;
     private Image healthFill;
@@ -28,17 +29,46 @@ public class EnemyHealthBar : MonoBehaviour
 
         enemyHealth = health;
         enemyHealth.HealthChanged += UpdateHealth;
+        enemyRenderers = GetComponentsInChildren<Renderer>();
         CreateBar();
         UpdateHealth(enemyHealth.CurrentHealth, enemyHealth.MaxHealth);
     }
 
     private void LateUpdate()
     {
+        if (barCanvas == null)
+        {
+            return;
+        }
+
+        UpdateBarPosition();
         Camera mainCamera = Camera.main;
-        if (barCanvas != null && mainCamera != null)
+        if (mainCamera != null)
         {
             barCanvas.LookAt(mainCamera.transform.position, Vector3.up);
         }
+    }
+
+    private void UpdateBarPosition()
+    {
+        float topY = float.NegativeInfinity;
+        if (enemyRenderers != null)
+        {
+            foreach (Renderer enemyRenderer in enemyRenderers)
+            {
+                if (enemyRenderer != null && enemyRenderer.enabled && enemyRenderer.gameObject.activeInHierarchy)
+                {
+                    topY = Mathf.Max(topY, enemyRenderer.bounds.max.y + 0.15f);
+                }
+            }
+        }
+
+        if (float.IsNegativeInfinity(topY))
+        {
+            topY = transform.position.y + heightOffset;
+        }
+
+        barCanvas.position = new Vector3(transform.position.x, topY, transform.position.z);
     }
 
     private void OnDestroy()
@@ -117,7 +147,6 @@ public class EnemyHealthBar : MonoBehaviour
     {
         GameObject canvasObject = new GameObject("Enemy Health Bar", typeof(RectTransform), typeof(Canvas));
         canvasObject.transform.SetParent(transform, false);
-        canvasObject.transform.localPosition = Vector3.up * heightOffset;
         // This halves the current bar area while preserving its proportions.
         canvasObject.transform.localScale = Vector3.one * 0.005f;
 
@@ -127,6 +156,7 @@ public class EnemyHealthBar : MonoBehaviour
         RectTransform canvasRect = canvasObject.GetComponent<RectTransform>();
         canvasRect.sizeDelta = new Vector2(180f, 26f);
         barCanvas = canvasObject.transform;
+        UpdateBarPosition();
 
         RectTransform frame = CreateRect("Frame", barCanvas);
         frame.anchorMin = Vector2.zero;
