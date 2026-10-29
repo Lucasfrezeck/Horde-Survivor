@@ -7,6 +7,6 @@ public class PlayerStats : MonoBehaviour
     public float moveSpeed = 10.0f;
     public int attackDmg = 30;
     public float attackSpeed = 1.0f;
-    public float attackRange = 3.5f;
+    public float attackRange = 5.25f;
     public float attackConeAngle = 120f;
 }

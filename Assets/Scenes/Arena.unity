@@ -619,7 +619,7 @@ MonoBehaviour:
   moveSpeed: 7.5
   attackDmg: 30
   attackSpeed: 1
-  attackRange: 3.5
+  attackRange: 5.25
   attackConeAngle: 120
 --- !u!114 &683337242
 MonoBehaviour:
