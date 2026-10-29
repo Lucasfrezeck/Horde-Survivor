@@ -486,6 +486,7 @@ GameObject:
   - component: {fileID: 683337242}
   - component: {fileID: 683337243}
   - component: {fileID: 683337244}
+  - component: {fileID: 683337245}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -616,9 +617,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 300
   moveSpeed: 7.5
-  attackDmg: 17
+  attackDmg: 30
   attackSpeed: 1
   attackRange: 3.5
+  attackConeAngle: 120
 --- !u!114 &683337242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -643,6 +645,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dff15897be62c71479ca30a82a2f649b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  punchCrossImpactTime: 0.4
+  punchJabImpactTime: 0.3
   attackOrigin: {fileID: 1067353045}
 --- !u!114 &683337244
 MonoBehaviour:
@@ -656,6 +660,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a301f8c63d914fd9a4ec1ae0868fe201, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &683337245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 683337233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33d4cf85e3de4b88a30fd44c471ed035, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyTemplate: {fileID: 1200770407}
+  hordeDuration: 60
+  spawnInterval: 2
+  enemiesPerSpawn: 2
+  maxAliveEnemies: 24
+  minSpawnRadius: 8
+  maxSpawnRadius: 12
+  terrainEdgeMargin: 2
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
