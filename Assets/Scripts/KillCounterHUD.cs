@@ -7,6 +7,7 @@ public class KillCounterHUD : MonoBehaviour
     private static readonly Color PanelColor = new Color(0.035f, 0.03f, 0.03f, 0.97f);
 
     private int killCount;
+    public int KillCount => killCount;
     private Texture2D skullTexture;
     private GUIStyle countStyle;
 

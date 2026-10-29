@@ -6,6 +6,7 @@ public class GameTimerHUD : MonoBehaviour
     private static readonly Color GoldColor = new Color(0.72f, 0.52f, 0.25f, 1f);
 
     private float startTime;
+    public int ElapsedSeconds => Mathf.Max(0, Mathf.FloorToInt(Time.timeSinceLevelLoad - startTime));
     private GUIStyle timerStyle;
 
     private void Awake()
@@ -33,7 +34,7 @@ public class GameTimerHUD : MonoBehaviour
         GUI.DrawTexture(new Rect(panelRect.x + 3f, panelRect.y + 3f, panelWidth - 6f, panelHeight - 6f),
             Texture2D.whiteTexture);
 
-        int elapsedSeconds = Mathf.Max(0, Mathf.FloorToInt(Time.timeSinceLevelLoad - startTime));
+        int elapsedSeconds = ElapsedSeconds;
         string timeText = string.Format("{0:00}:{1:00}", elapsedSeconds / 60, elapsedSeconds % 60);
 
         GUI.color = Color.white;

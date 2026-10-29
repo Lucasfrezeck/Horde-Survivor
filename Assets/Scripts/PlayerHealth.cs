@@ -26,6 +26,7 @@ public class PlayerHealth : MonoBehaviour
     public int MaxHealth => playerStats != null ? Mathf.Max(0, playerStats.maxHealth) : 0;
 
     public event Action<int, int> HealthChanged;
+    public event Action Died;
 
     private void Start()
     {
@@ -59,6 +60,8 @@ public class PlayerHealth : MonoBehaviour
 
         HealthChanged?.Invoke(currentHealth, MaxHealth);
         Debug.Log("Você tem " + currentHealth + " de vida.");
+        if (GetComponent<GameOverScreen>() == null)
+            gameObject.AddComponent<GameOverScreen>();
     }
 
     private void Update()
@@ -96,6 +99,7 @@ public class PlayerHealth : MonoBehaviour
         {
             Debug.Log("Você está morto.");
             PlayDeathAnimation();
+            Died?.Invoke();
             return;
         }
 
